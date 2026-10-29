@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="5"
+        android:weightSum="6"
         android:layout_marginBottom="8dp">
 
         <Button
@@ -32,11 +32,22 @@
             android:layout_marginEnd="2dp" />
 
         <Button
+            android:id="@+id/reloadButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⟳"
+            android:textSize="18sp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp" />
+
+        <Button
             android:id="@+id/recentButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Последние"
+            android:textSize="11sp"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp" />
 
@@ -46,6 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Десктоп"
+            android:textSize="11sp"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp" />
 
@@ -55,6 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Тема"
+            android:textSize="11sp"
             android:layout_marginStart="2dp" />
 
     </LinearLayout>

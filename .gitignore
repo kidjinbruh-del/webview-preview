@@ -13,3 +13,7 @@ local.properties
 # APK
 *.apk
 *.aab
+
+# ключ подписи и локальные настройки
+*.keystore
+local.properties

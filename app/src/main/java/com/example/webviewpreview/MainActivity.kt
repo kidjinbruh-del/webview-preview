@@ -2,29 +2,28 @@ package com.example.webviewpreview
 
 import android.content.ClipData
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
+import android.view.DragEvent
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.documentfile.provider.DocumentFile
 import java.util.Collections
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var webview: WebView
     private val recentFiles = Collections.synchronizedList(mutableListOf<Uri>())
-    private var isDesktopMode by mutableStateOf(false)
-    private var isDarkTheme by mutableStateOf(false)
+    private var isDesktopMode = false
+    private var isDarkTheme = false
 
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -47,7 +46,6 @@ class MainActivity : ComponentActivity() {
     private fun loadHtmlFile(uri: Uri) {
         try {
             val contentResolver = contentResolver
-            val mimeType = contentResolver.getType(uri) ?: "text/html"
             val htmlContent = contentResolver.openInputStream(uri)?.use { stream ->
                 stream.bufferedReader().use { reader -> reader.readText() }
             } ?: ""
@@ -62,7 +60,7 @@ class MainActivity : ComponentActivity() {
     private fun loadHtmlFromDirectory(dirUri: Uri) {
         try {
             val contentResolver = contentResolver
-            val docFile = android.content.DocumentFile.fromTreeUri(this, dirUri)
+            val docFile = DocumentFile.fromTreeUri(this, dirUri)
             val htmlFile = docFile?.findFile("index.html")
             if (htmlFile != null && htmlFile.exists()) {
                 val htmlContent = contentResolver.openInputStream(htmlFile.uri)?.use { stream ->
@@ -101,9 +99,17 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        isDarkTheme = savedInstanceState?.getBoolean("dark") ?: false
+        isDesktopMode = savedInstanceState?.getBoolean("desktop") ?: false
+        setTheme(if (isDarkTheme) R.style.Theme_WebViewPreview_Dark else R.style.Theme_WebViewPreview)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         webview = findViewById(R.id.webview)
+
+        savedInstanceState?.getStringArrayList("recent")?.forEach { s ->
+            recentFiles.add(Uri.parse(s))
+        }
+        if (isDesktopMode) applyViewportSettings()
 
         val settings: WebSettings = webview.settings
         settings.javaScriptEnabled = true
@@ -128,12 +134,12 @@ class MainActivity : ComponentActivity() {
         }
         webview.webChromeClient = WebChromeClient()
 
-        val openFileButton = findViewById<android.widget.Button>(R.id.openFileButton)
-        val openDirButton = findViewById<android.widget.Button>(R.id.openDirButton)
-        val reloadButton = findViewById<android.widget.Button>(R.id.reloadButton)
-        val desktopButton = findViewById<android.widget.Button>(R.id.desktopButton)
-        val themeButton = findViewById<android.widget.Button>(R.id.themeButton)
-        val recentButton = findViewById<android.widget.Button>(R.id.recentButton)
+        val openFileButton = findViewById<Button>(R.id.openFileButton)
+        val openDirButton = findViewById<Button>(R.id.openDirButton)
+        val reloadButton = findViewById<Button>(R.id.reloadButton)
+        val desktopButton = findViewById<Button>(R.id.desktopButton)
+        val themeButton = findViewById<Button>(R.id.themeButton)
+        val recentButton = findViewById<Button>(R.id.recentButton)
 
         openFileButton.setOnClickListener { filePickerLauncher.launch("text/html") }
         openDirButton.setOnClickListener { dirPickerLauncher.launch(null) }
@@ -147,8 +153,6 @@ class MainActivity : ComponentActivity() {
 
         themeButton.setOnClickListener {
             isDarkTheme = !isDarkTheme
-            androidx.core.content.res.ConfigurationCompat
-                .getResources(configuration)
             recreate()
         }
 
@@ -162,8 +166,8 @@ class MainActivity : ComponentActivity() {
 
         webview.setOnDragListener { v, event ->
             when (event.action) {
-                DragEvent.ACTION_DRAG_ENTER -> { v.alpha = 0.7f; true }
-                DragEvent.ACTION_DRAG_EXIT -> { v.alpha = 1.0f; true }
+                DragEvent.ACTION_DRAG_ENTERED -> { v.alpha = 0.7f; true }
+                DragEvent.ACTION_DRAG_EXITED -> { v.alpha = 1.0f; true }
                 DragEvent.ACTION_DROP -> {
                     v.alpha = 1.0f
                     val clipData = event.clipData
@@ -180,9 +184,21 @@ class MainActivity : ComponentActivity() {
         webview.setOnLongClickListener { v ->
             val clipData = ClipData.newPlainText("text", "drag")
             val shadow = android.view.View.DragShadowBuilder(v)
-            v.startDragAndDrop(clipData, shadow, v, 0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                v.startDragAndDrop(clipData, shadow, v, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                v.startDrag(clipData, shadow, v, 0)
+            }
             true
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("dark", isDarkTheme)
+        outState.putBoolean("desktop", isDesktopMode)
+        outState.putStringArrayList("recent", ArrayList(recentFiles.map { it.toString() }))
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -194,7 +210,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         webview.stopLoading()
-        webview.clearCache()
+        webview.clearCache(true)
         webview.clearHistory()
         webview.destroy()
         super.onDestroy()
