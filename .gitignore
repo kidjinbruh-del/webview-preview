@@ -1,0 +1,15 @@
+# Android / Gradle
+.gradle/
+build/
+app/build/
+app/release/
+local.properties
+.cxx/
+
+# IDE
+.idea/
+*.iml
+
+# APK
+*.apk
+*.aab
