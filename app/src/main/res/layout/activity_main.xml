@@ -4,13 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="8dp"
-    android:id="@+id/rootLayout">
+    android:id="@+id/rootLayout"
+    android:background="?android:attr/windowBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="3">
+        android:weightSum="5"
+        android:layout_marginBottom="8dp">
 
         <Button
             android:id="@+id/openFileButton"
@@ -18,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Файл"
-            android:layout_marginEnd="4dp" />
+            android:layout_marginEnd="2dp" />
 
         <Button
             android:id="@+id/openDirButton"
@@ -26,50 +28,45 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Папку"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp" />
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp" />
 
         <Button
-            android:id="@+id/reloadButton"
+            android:id="@+id/recentButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Обновить"
-            android:layout_marginStart="4dp" />
+            android:text="Последние"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp" />
+
+        <Button
+            android:id="@+id/desktopButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Десктоп"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp" />
+
+        <Button
+            android:id="@+id/themeButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Тема"
+            android:layout_marginStart="2dp" />
 
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp">
+        android:layout_height="match_parent">
 
         <WebView
             android:id="@+id/webview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
-        <View
-            android:id="@+id/dropZoneLeft"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:background="#80FF5722"
-            android:visibility="gone" />
-
-        <View
-            android:id="@+id/dropZoneRight"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:background="#80FF5722"
-            android:visibility="gone" />
-
-        <View
-            android:id="@+id/dropZoneCenter"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#00000000"
-            android:visibility="gone" />
 
     </FrameLayout>
 
